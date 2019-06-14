@@ -25,7 +25,7 @@ class PushSubscription extends Model
      */
     public function user()
     {
-        return $this->belongsTo(Config::get('auth.providers.users.model'));
+        return $this->subscribable()->first();
     }
 
     /**
@@ -37,5 +37,13 @@ class PushSubscription extends Model
     public static function findByEndpoint($endpoint)
     {
         return static::where('endpoint', $endpoint)->first();
+    }
+
+    /**
+     * Get all of the models that own push_subscription.
+     */
+    public function subscribable()
+    {
+        return $this->morphTo();
     }
 }

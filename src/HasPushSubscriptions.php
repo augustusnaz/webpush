@@ -11,7 +11,8 @@ trait HasPushSubscriptions
      */
     public function pushSubscriptions()
     {
-        return $this->hasMany(PushSubscription::class);
+        //return $this->hasMany(PushSubscription::class);
+        return $this->morphMany(PushSubscription::Class, 'subscribable');
     }
 
     /**
@@ -24,7 +25,8 @@ trait HasPushSubscriptions
      */
     public function updatePushSubscription($endpoint, $key = null, $token = null)
     {
-        $subscription = PushSubscription::findByEndpoint($endpoint);
+        // $subscription = PushSubscription::findByEndpoint($endpoint);
+        $subscription = $this->pushSubscriptions->where('endpoint', $endpoint)->first();
 
         if ($subscription && $this->pushSubscriptionBelongsToUser($subscription)) {
             $subscription->public_key = $key;
@@ -53,7 +55,8 @@ trait HasPushSubscriptions
      */
     public function pushSubscriptionBelongsToUser($subscription)
     {
-        return (int) $subscription->user_id === (int) $this->getAuthIdentifier();
+        // return (int) $subscription->user_id === (int) $this->getAuthIdentifier();
+        return (int) $subscription->user()->id === (int) $this->getAuthIdentifier();
     }
 
     /**
@@ -64,9 +67,8 @@ trait HasPushSubscriptions
      */
     public function deletePushSubscription($endpoint)
     {
-        $this->pushSubscriptions()
-            ->where('endpoint', $endpoint)
-            ->delete();
+        $subscription = $this->pushSubscriptions->where('endpoint', $endpoint)->first();
+        if( $subscription ) $subscription->delete();
     }
 
     /**
